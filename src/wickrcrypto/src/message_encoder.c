@@ -78,7 +78,7 @@ void wickr_message_encoder_destroy(wickr_message_encoder_t **encoder)
 wickr_encoder_result_t *wickr_message_encoder_encode(const wickr_message_encoder_t *encoder,
                                                      const wickr_payload_t *payload,
                                                      const wickr_node_array_t *nodes)
-{    
+{
     return wickr_message_encoder_encode_custom(encoder, payload, nodes, wickr_encoder_keys_gen_default_random);
 }
 
@@ -93,6 +93,10 @@ wickr_encoder_result_t *wickr_message_encoder_encode_custom(const wickr_message_
     
     wickr_encoder_keys_t *encoder_keys = keygen_func(encoder->crypto_engine);
     
+    if (!encoder_keys) {
+        return NULL;
+    }
+    
     wickr_packet_t *generated_packet = wickr_packet_create_from_components(&encoder->crypto_engine,
                                                                            encoder->header_key,
                                                                            encoder_keys->payload_key,
@@ -102,13 +106,20 @@ wickr_encoder_result_t *wickr_message_encoder_encode_custom(const wickr_message_
                                                                            encoder->sender_identity,
                                                                            encoder->protocol_version);
     
-    wickr_encoder_result_t *result = wickr_encoder_result_create(wickr_cipher_key_copy(encoder_keys->payload_key),
-                                                                 generated_packet);
+    if (!generated_packet) {
+        wickr_encoder_keys_destroy(&encoder_keys);
+        return NULL;
+    }
     
+    wickr_cipher_key_t *payload_key_copy = wickr_cipher_key_copy(encoder_keys->payload_key);
     wickr_encoder_keys_destroy(&encoder_keys);
+    
+    wickr_encoder_result_t *result = wickr_encoder_result_create(payload_key_copy,
+                                                                 generated_packet);
     
     if (!result) {
         wickr_packet_destroy(&generated_packet);
+        wickr_cipher_key_destroy(&payload_key_copy);
     }
     
     return result;

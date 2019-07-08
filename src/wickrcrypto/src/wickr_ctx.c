@@ -3,6 +3,7 @@
 #include "memory.h"
 #include "private/identity_priv.h"
 #include "private/storage_priv.h"
+#include "message_encoder.h"
 
 static wickr_ctx_gen_result_t *__wickr_ctx_gen_result_create(wickr_ctx_t *ctx, wickr_cipher_key_t *recovery_key, wickr_root_keys_t *root_keys)
 {
@@ -394,6 +395,22 @@ wickr_ctx_t *wickr_ctx_create(const wickr_crypto_engine_t engine, wickr_dev_info
         return NULL;
     }
     
+    wickr_identity_chain_t *id_chain_copy = wickr_identity_chain_copy(id_chain);
+    
+    if (!id_chain_copy) {
+        wickr_cipher_key_destroy(&packet_header_key);
+        return NULL;
+    }
+    
+    wickr_message_encoder_t *msg_encoder = wickr_message_encoder_create(engine, id_chain_copy,
+                                                                        packet_header_key, DEFAULT_PKT_ENC_VERSION);
+    
+    if (!msg_encoder) {
+        wickr_cipher_key_destroy(&packet_header_key);
+        wickr_identity_chain_destroy(&id_chain_copy);
+        return NULL;
+    }
+    
     wickr_ctx_t *new_ctx = wickr_alloc_zero(sizeof(wickr_ctx_t));
     
     if (!new_ctx) {
@@ -403,14 +420,8 @@ wickr_ctx_t *wickr_ctx_create(const wickr_crypto_engine_t engine, wickr_dev_info
     new_ctx->dev_info = dev_info;
     new_ctx->id_chain = id_chain;
     new_ctx->storage_keys = storage_keys;
-    new_ctx->packet_header_key = packet_header_key;
+    new_ctx->msg_encoder = msg_encoder;
     new_ctx->engine = engine;
-    new_ctx->pkt_enc_version = DEFAULT_PKT_ENC_VERSION;
-    
-    if (!new_ctx->packet_header_key) {
-        wickr_ctx_destroy(&new_ctx);
-        return NULL;
-    }
     
     return new_ctx;
 }
@@ -450,8 +461,6 @@ wickr_ctx_t *wickr_ctx_copy(const wickr_ctx_t *ctx)
         wickr_storage_keys_destroy(&storage_keys_copy);
     }
     
-    copy->pkt_enc_version = ctx->pkt_enc_version;
-    
     return copy;
 }
 
@@ -464,7 +473,7 @@ void wickr_ctx_destroy(wickr_ctx_t **ctx)
     wickr_dev_info_destroy(&(*ctx)->dev_info);
     wickr_identity_chain_destroy(&(*ctx)->id_chain);
     wickr_storage_keys_destroy(&(*ctx)->storage_keys);
-    wickr_cipher_key_destroy(&(*ctx)->packet_header_key);
+    wickr_message_encoder_destroy(&(*ctx)->msg_encoder);
     
     wickr_free(*ctx);
     *ctx = NULL;
@@ -750,39 +759,7 @@ void wickr_ctx_packet_destroy(wickr_ctx_packet_t **packet)
 
 wickr_encoder_result_t *wickr_ctx_encode_packet(const wickr_ctx_t *ctx, const wickr_payload_t *payload, const wickr_node_array_t *nodes)
 {
-    if (!ctx || !payload || !nodes) {
-        return NULL;
-    }
-    
-    /* Generate a random key to encode the payload for this packet */
-    wickr_cipher_key_t *rnd_payload_key = ctx->engine.wickr_crypto_engine_cipher_key_random(ctx->engine.default_cipher);
-    
-    if (!rnd_payload_key) {
-        return NULL;
-    }
-    
-    /* Generate a random ec key pair to use for the key exchanges for this packet */
-    wickr_ec_key_t *rnd_exchange_key = ctx->engine.wickr_crypto_engine_ec_rand_key(ctx->engine.default_curve);
-    
-    if (!rnd_exchange_key) {
-        wickr_cipher_key_destroy(&rnd_payload_key);
-        return NULL;
-    }
-    
-    /* Pass our keys, payload, and recipient information to the packet generation function */
-    wickr_packet_t *generated_packet = wickr_packet_create_from_components(&ctx->engine, ctx->packet_header_key, rnd_payload_key, rnd_exchange_key, payload, nodes, ctx->id_chain, ctx->pkt_enc_version);
-    
-    wickr_ec_key_destroy(&rnd_exchange_key);
-    
-    wickr_encoder_result_t *ctx_encode = wickr_encoder_result_create(rnd_payload_key, generated_packet);
-    
-    if (!ctx_encode) {
-        wickr_cipher_key_destroy(&rnd_payload_key);
-        wickr_packet_destroy(&generated_packet);
-    }
-    
-    return ctx_encode;
-    
+    return wickr_message_encoder_encode(ctx->msg_encoder, payload, nodes);
 }
 
 static wickr_ctx_packet_t *__wickr_ctx_read_packet(const wickr_ctx_t *ctx, const wickr_buffer_t *packet_buffer, const wickr_identity_chain_t *sender, bool for_decode)

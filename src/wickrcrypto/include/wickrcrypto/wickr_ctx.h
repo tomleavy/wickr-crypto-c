@@ -29,7 +29,7 @@
 #include "storage.h"
 #include "identity.h"
 #include "protocol.h"
-#include "encoder_result.h"
+#include "message_encoder.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,8 +75,7 @@ struct wickr_ctx {
     wickr_dev_info_t *dev_info;
     wickr_identity_chain_t *id_chain;
     wickr_storage_keys_t *storage_keys;
-    wickr_cipher_key_t *packet_header_key;
-    uint8_t pkt_enc_version;
+    wickr_message_encoder_t *msg_encoder;
 };
 
 typedef struct wickr_ctx wickr_ctx_t;
