@@ -247,8 +247,8 @@ void reset_alice_bob()
 {
     const wickr_crypto_engine_t default_engine = wickr_crypto_engine_get_default();
 
-    wickr_node_t *alice_node_1 = createUserNode("alice", hex_char_to_buffer("alice_device"));
-    wickr_node_t *bob_node_1 = createUserNode("bob", hex_char_to_buffer("bob_device"));
+    wickr_node_t *alice_node_1 = create_user_node("alice", hex_char_to_buffer("alice_device"));
+    wickr_node_t *bob_node_1 = create_user_node("bob", hex_char_to_buffer("bob_device"));
     wickr_node_t *alice_node_2 = wickr_node_copy(alice_node_1);
     wickr_node_t *bob_node_2 = wickr_node_copy(bob_node_1);
     
@@ -323,8 +323,8 @@ DESCRIBE(wickr_transport_ctx, "wickr_transport_ctx")
 {
     const wickr_crypto_engine_t default_engine = wickr_crypto_engine_get_default();
     
-    wickr_node_t *alice_node_1 = createUserNode("alice", hex_char_to_buffer("alice_device"));
-    wickr_node_t *bob_node_1 = createUserNode("bob", hex_char_to_buffer("bob_device"));
+    wickr_node_t *alice_node_1 = create_user_node("alice", hex_char_to_buffer("alice_device"));
+    wickr_node_t *bob_node_1 = create_user_node("bob", hex_char_to_buffer("bob_device"));
     wickr_node_t *alice_node_2 = wickr_node_copy(alice_node_1);
     wickr_node_t *bob_node_2 = wickr_node_copy(bob_node_1);
     
@@ -1134,7 +1134,7 @@ DESCRIBE(wickr_transport_ctx, "wickr_transport_ctx")
     
     IT("will drop the connection if a presented, valid, identity is passed that does not match the pinned identity")
     {
-        wickr_node_t *charlie = createUserNode("charlie", hex_char_to_buffer("charlie_device"));
+        wickr_node_t *charlie = create_user_node("charlie", hex_char_to_buffer("charlie_device"));
         SHOULD_NOT_BE_NULL(charlie);
         
         wickr_node_destroy(&alice_transport->local_identity);

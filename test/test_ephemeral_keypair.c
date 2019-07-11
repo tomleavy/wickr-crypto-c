@@ -21,7 +21,7 @@ DESCRIBE(ephemeral_keypair, "ephemeral keypair")
     }
     END_IT
     
-    wickr_identity_chain_t *test_chain = createIdentityChain("alice");
+    wickr_identity_chain_t *test_chain = create_identity_chain("alice");
     SHOULD_NOT_BE_NULL(test_chain);
     wickr_ephemeral_keypair_t *id_keypair = NULL;
 
@@ -38,7 +38,7 @@ DESCRIBE(ephemeral_keypair, "ephemeral keypair")
     
     IT("can have it's ownership validated")
     {
-        wickr_identity_chain_t *test_invalid = createIdentityChain("bob");
+        wickr_identity_chain_t *test_invalid = create_identity_chain("bob");
         SHOULD_BE_TRUE(wickr_ephemeral_keypair_verify_owner(id_keypair, &engine, test_chain->node));
         SHOULD_BE_FALSE(wickr_ephemeral_keypair_verify_owner(id_keypair, &engine, test_invalid->node));
         wickr_identity_chain_destroy(&test_invalid);

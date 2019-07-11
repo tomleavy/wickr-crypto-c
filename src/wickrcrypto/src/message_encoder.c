@@ -23,6 +23,7 @@ wickr_message_encoder_t *wickr_message_encoder_create(wickr_crypto_engine_t engi
     }
     
     encoder->crypto_engine = engine;
+    encoder->sender_identity = sender_identity;
     encoder->header_key = header_key;
     encoder->protocol_version = protocol_version;
     

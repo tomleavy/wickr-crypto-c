@@ -13,14 +13,14 @@
 DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
 {
     /* Test setup */
-    initTest();
+    init_test();
     
     wickr_key_exchange_t *key_exchange = NULL;
     
-    wickr_cipher_key_t *pktKey = engine.wickr_crypto_engine_cipher_key_random(CIPHER_AES256_CTR);
-    wickr_identity_chain_t *sender_identity = createIdentityChain("Alice");
+    wickr_cipher_key_t *pkt_key = engine.wickr_crypto_engine_cipher_key_random(CIPHER_AES256_CTR);
+    wickr_identity_chain_t *sender_identity = create_identity_chain("Alice");
     wickr_ec_key_t *exchange_key = engine.wickr_crypto_engine_ec_rand_key(engine.default_curve);
-    wickr_node_t *receiver = createUserNode("Bob", engine.wickr_crypto_engine_crypto_random(32));
+    wickr_node_t *receiver = create_user_node("Bob", engine.wickr_crypto_engine_crypto_random(32));
     
     if (key_exchange != NULL) {
         wickr_key_exchange_destroy(&key_exchange);
@@ -36,7 +36,7 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
                                                                                         sender_identity,
                                                                                         receiver,
                                                                                         exchange_key,
-                                                                                        pktKey,
+                                                                                        pkt_key,
                                                                                         NULL,
                                                                                         i);
             
@@ -48,12 +48,12 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
                                                                                   NULL,
                                                                                   i);
             
-            SHOULD_BE_TRUE(wickr_buffer_is_equal(cipher_key->key_data, pktKey->key_data, NULL));
-            SHOULD_EQUAL(cipher_key->cipher.cipher_id, pktKey->cipher.cipher_id);
-            SHOULD_EQUAL(cipher_key->cipher.is_authenticated, pktKey->cipher.is_authenticated);
-            SHOULD_EQUAL(cipher_key->cipher.auth_tag_len, pktKey->cipher.auth_tag_len);
-            SHOULD_EQUAL(cipher_key->cipher.key_len, pktKey->cipher.key_len);
-            SHOULD_EQUAL(cipher_key->cipher.iv_len, pktKey->cipher.iv_len);
+            SHOULD_BE_TRUE(wickr_buffer_is_equal(cipher_key->key_data, pkt_key->key_data, NULL));
+            SHOULD_EQUAL(cipher_key->cipher.cipher_id, pkt_key->cipher.cipher_id);
+            SHOULD_EQUAL(cipher_key->cipher.is_authenticated, pkt_key->cipher.is_authenticated);
+            SHOULD_EQUAL(cipher_key->cipher.auth_tag_len, pkt_key->cipher.auth_tag_len);
+            SHOULD_EQUAL(cipher_key->cipher.key_len, pkt_key->cipher.key_len);
+            SHOULD_EQUAL(cipher_key->cipher.iv_len, pkt_key->cipher.iv_len);
             wickr_cipher_key_destroy(&cipher_key);
             
             wickr_key_exchange_destroy(&exchange);
@@ -71,7 +71,7 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
                                                                                         sender_identity,
                                                                                         receiver,
                                                                                         exchange_key,
-                                                                                        pktKey,
+                                                                                        pkt_key,
                                                                                         psk,
                                                                                         i);
             
@@ -83,12 +83,12 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
                                                        psk,
                                                        i);
             
-            SHOULD_BE_TRUE(wickr_buffer_is_equal(key->key_data, pktKey->key_data, NULL));
-            SHOULD_EQUAL(key->cipher.cipher_id, pktKey->cipher.cipher_id);
-            SHOULD_EQUAL(key->cipher.is_authenticated, pktKey->cipher.is_authenticated);
-            SHOULD_EQUAL(key->cipher.auth_tag_len, pktKey->cipher.auth_tag_len);
-            SHOULD_EQUAL(key->cipher.key_len, pktKey->cipher.key_len);
-            SHOULD_EQUAL(key->cipher.iv_len, pktKey->cipher.iv_len);
+            SHOULD_BE_TRUE(wickr_buffer_is_equal(key->key_data, pkt_key->key_data, NULL));
+            SHOULD_EQUAL(key->cipher.cipher_id, pkt_key->cipher.cipher_id);
+            SHOULD_EQUAL(key->cipher.is_authenticated, pkt_key->cipher.is_authenticated);
+            SHOULD_EQUAL(key->cipher.auth_tag_len, pkt_key->cipher.auth_tag_len);
+            SHOULD_EQUAL(key->cipher.key_len, pkt_key->cipher.key_len);
+            SHOULD_EQUAL(key->cipher.iv_len, pkt_key->cipher.iv_len);
             
             wickr_cipher_key_destroy(&key);
             wickr_key_exchange_destroy(&exchange);
@@ -104,7 +104,7 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
             
             /* Generate a random psk, and serialize the test key into bytes */
             wickr_buffer_t *psk = engine.wickr_crypto_engine_crypto_random(32);
-            wickr_buffer_t *key_bytes = wickr_cipher_key_serialize(pktKey);
+            wickr_buffer_t *key_bytes = wickr_cipher_key_serialize(pkt_key);
             SHOULD_NOT_BE_NULL(key_bytes);
             
             /* Generate a key exchange using key as raw data */
@@ -147,12 +147,12 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
             SHOULD_BE_TRUE(wickr_buffer_is_equal(key_serialized, decoded_bytes, NULL));
             
             /* Verify that the key derived is equal to the original key */
-            SHOULD_BE_TRUE(wickr_buffer_is_equal(key->key_data, pktKey->key_data, NULL));
-            SHOULD_EQUAL(key->cipher.cipher_id, pktKey->cipher.cipher_id);
-            SHOULD_EQUAL(key->cipher.is_authenticated, pktKey->cipher.is_authenticated);
-            SHOULD_EQUAL(key->cipher.auth_tag_len, pktKey->cipher.auth_tag_len);
-            SHOULD_EQUAL(key->cipher.key_len, pktKey->cipher.key_len);
-            SHOULD_EQUAL(key->cipher.iv_len, pktKey->cipher.iv_len);
+            SHOULD_BE_TRUE(wickr_buffer_is_equal(key->key_data, pkt_key->key_data, NULL));
+            SHOULD_EQUAL(key->cipher.cipher_id, pkt_key->cipher.cipher_id);
+            SHOULD_EQUAL(key->cipher.is_authenticated, pkt_key->cipher.is_authenticated);
+            SHOULD_EQUAL(key->cipher.auth_tag_len, pkt_key->cipher.auth_tag_len);
+            SHOULD_EQUAL(key->cipher.key_len, pkt_key->cipher.key_len);
+            SHOULD_EQUAL(key->cipher.iv_len, pkt_key->cipher.iv_len);
             
             /* Cleanup */
             wickr_buffer_destroy(&key_bytes);
@@ -177,7 +177,7 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
                                                                                         sender_identity,
                                                                                         receiver,
                                                                                         exchange_key,
-                                                                                        pktKey,
+                                                                                        pkt_key,
                                                                                         psk,
                                                                                         i);
             
@@ -189,7 +189,7 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
                                                                            NULL,
                                                                            i);
             
-            SHOULD_BE_FALSE(wickr_buffer_is_equal(key ? key->key_data : NULL, pktKey->key_data, NULL));
+            SHOULD_BE_FALSE(wickr_buffer_is_equal(key ? key->key_data : NULL, pkt_key->key_data, NULL));
             
             wickr_cipher_key_destroy(&key);
             
@@ -203,7 +203,7 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
             
             wickr_cipher_key_destroy(&key);
             
-            SHOULD_BE_FALSE(wickr_buffer_is_equal(key ? key->key_data : NULL, pktKey->key_data, NULL));
+            SHOULD_BE_FALSE(wickr_buffer_is_equal(key ? key->key_data : NULL, pkt_key->key_data, NULL));
             wickr_buffer_destroy(&psk);
             wickr_key_exchange_destroy(&exchange);
             wickr_buffer_destroy(&incorrect_psk);
@@ -231,7 +231,7 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
             
             wickr_node_destroy(&receiver_copy);
             
-            SHOULD_BE_FALSE(wickr_buffer_is_equal(cipher_key ? cipher_key->key_data : NULL, pktKey->key_data, NULL));
+            SHOULD_BE_FALSE(wickr_buffer_is_equal(cipher_key ? cipher_key->key_data : NULL, pkt_key->key_data, NULL));
         }
     }
     END_IT
@@ -255,7 +255,7 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
             
             wickr_node_destroy(&receiver_copy);
             
-            SHOULD_BE_FALSE(wickr_buffer_is_equal(cipher_key ? cipher_key->key_data : NULL, pktKey->key_data, NULL));
+            SHOULD_BE_FALSE(wickr_buffer_is_equal(cipher_key ? cipher_key->key_data : NULL, pkt_key->key_data, NULL));
         }
     }
     END_IT
@@ -273,7 +273,7 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
                                                                                   NULL,
                                                                                   i);
             wickr_ec_key_destroy(&incorrect_remote_key);
-            SHOULD_BE_FALSE(wickr_buffer_is_equal(cipher_key ? cipher_key->key_data : NULL, pktKey->key_data, NULL));
+            SHOULD_BE_FALSE(wickr_buffer_is_equal(cipher_key ? cipher_key->key_data : NULL, pkt_key->key_data, NULL));
         }
     }
     END_IT
@@ -297,7 +297,7 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
             
             wickr_node_destroy(&receiver_copy);
             
-            SHOULD_BE_FALSE(wickr_buffer_is_equal(cipher_key ? cipher_key->key_data : NULL, pktKey->key_data, NULL));
+            SHOULD_BE_FALSE(wickr_buffer_is_equal(cipher_key ? cipher_key->key_data : NULL, pkt_key->key_data, NULL));
         }
     }
     END_IT
@@ -321,7 +321,7 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
                                                                                   i);
             wickr_identity_chain_destroy(&sender_copy);
             
-            SHOULD_BE_FALSE(wickr_buffer_is_equal(cipher_key ? cipher_key->key_data : NULL, pktKey->key_data, NULL));
+            SHOULD_BE_FALSE(wickr_buffer_is_equal(cipher_key ? cipher_key->key_data : NULL, pkt_key->key_data, NULL));
             wickr_cipher_key_destroy(&cipher_key);
         }
     }
@@ -337,12 +337,12 @@ DESCRIBE(wickr_protocol_key_exchanges, "protocol: wickr_key_exchange")
                                                                                   key_exchange,
                                                                                   NULL,
                                                                                   i);
-            SHOULD_BE_FALSE(wickr_buffer_is_equal(cipher_key ? cipher_key->key_data : NULL, pktKey->key_data, NULL));
+            SHOULD_BE_FALSE(wickr_buffer_is_equal(cipher_key ? cipher_key->key_data : NULL, pkt_key->key_data, NULL));
         }
     }
     END_IT
     
-    wickr_cipher_key_destroy(&pktKey);
+    wickr_cipher_key_destroy(&pkt_key);
     wickr_key_exchange_destroy(&key_exchange);
     wickr_identity_chain_destroy(&sender_identity);
     wickr_ec_key_destroy(&exchange_key);
@@ -371,7 +371,7 @@ static wickr_cipher_key_t *__gen_test_rand_header_key(const wickr_crypto_engine_
 
 DESCRIBE(wickr_packet_create_from_components, "protocol: wickr_packet_create_from_components")
 {
-    initTest();
+    init_test();
     
     wickr_cipher_key_t *headerKey = __gen_test_header_key(engine, engine.default_cipher, NULL);
     wickr_cipher_key_t *payloadKey = engine.wickr_crypto_engine_cipher_key_random(engine.default_cipher);
@@ -391,15 +391,15 @@ DESCRIBE(wickr_packet_create_from_components, "protocol: wickr_packet_create_fro
 
     // Create user 1
     char *dev1Str = "ALICEDEVICE";
-    wickr_buffer_t *devID1 = createDeviceIdentity((uint8_t*)dev1Str, strlen(dev1Str));
-    wickr_node_t *user1Node = createUserNode("alice@wickr.com", devID1);
+    wickr_buffer_t *devID1 = create_device_identity((uint8_t*)dev1Str, strlen(dev1Str));
+    wickr_node_t *user1Node = create_user_node("alice@wickr.com", devID1);
 
     wickr_node_array_set_item(recipients, 0, user1Node);
 
     // Create user 2
     char *dev2Str = "BOBDEVICE";
-    wickr_buffer_t *devID2 = createDeviceIdentity((uint8_t*)dev2Str, strlen(dev2Str));
-    wickr_node_t *user2Node = createUserNode("bob@wickr.com", devID2);
+    wickr_buffer_t *devID2 = create_device_identity((uint8_t*)dev2Str, strlen(dev2Str));
+    wickr_node_t *user2Node = create_user_node("bob@wickr.com", devID2);
 
     wickr_packet_t *pkt = NULL;
     
