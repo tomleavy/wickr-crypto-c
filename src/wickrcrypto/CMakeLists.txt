@@ -21,6 +21,10 @@ endif (BUILD_OPENSSL)
 
 target_link_libraries(wickrcrypto bcrypt scrypt protobuf-c ${OPENSSL_CRYPTO_LIBRARY})
 
+if (${FIPS} AND ${ANDROID_ABI} STREQUAL "x86")
+    target_link_libraries(wickrcrypto -Wl,--no-warn-shared-textrel)
+endif ()
+
 install(TARGETS wickrcrypto EXPORT WickrCryptoConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
