@@ -11,16 +11,6 @@ if [ ! -d "${DEVELOPER}" ]; then
 fi
 
 export HOSTCC=/usr/bin/cc
-chmod +x Configure && ./Configure darwin64-x86_64-cc --prefix=${TARGETDIR}
-make
-make build_tests && make build_algvs
-cd iOS
-make incore_macho
-cd ..
-mkdir -p ${TARGETDIR}
-cp -R iOS ${TARGETDIR}/iOS
-make install
-make clean
 
 for ARCH in ${ARCHS}
 do
@@ -98,15 +88,29 @@ do
   # Determine configure target
   if [ "${ARCH}" == "x86_64" ]; then
     LOCAL_CONFIG_OPTIONS="darwin64-x86_64-cc no-asm ${LOCAL_CONFIG_OPTIONS}"
-  else 
+  elif [ "${ARCH}" == "arm64" ]; then 
+    LOCAL_CONFIG_OPTIONS="ios64-cross ${LOCAL_CONFIG_OPTIONS}"
+  else
     LOCAL_CONFIG_OPTIONS="iphoneos-cross ${LOCAL_CONFIG_OPTIONS}"
   fi
 
   chmod +x Configure && ./Configure ${LOCAL_CONFIG_OPTIONS}
 
   # Run make
+
   make
+
+  if [ -z $COMPILED_INCORE ]; then 
+    echo "BUILDING INCORE"
+    cd iOS
+    make
+    cd ..
+    cp -R iOS ${TARGETDIR}/iOS
+    COMPILED_INCORE=1
+  fi
+
   make install
   make clean
 
 done
+

@@ -114,7 +114,7 @@ do
   if [ "${ARCH}" == "x86_64" ]; then
     LOCAL_CONFIG_OPTIONS="fips darwin64-x86_64-cc no-asm ${LOCAL_CONFIG_OPTIONS}"
   else
-    LOCAL_CONFIG_OPTIONS="fips iphoneos-cross ${LOCAL_CONFIG_OPTIONS}"
+    LOCAL_CONFIG_OPTIONS="iphoneos-cross ${LOCAL_CONFIG_OPTIONS}"
   fi
 
   # Run Configure
